@@ -1,0 +1,162 @@
+﻿<Window x:Class="TimeTracker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TimeTracker"
+        mc:Ignorable="d"
+        x:Name="TimeTrackerWindow"
+        Title="Time Tracker" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Content="{Binding timer}" Width="100" VerticalAlignment="Center" FontSize="18" FontWeight="Bold"/>
+        <Button Command="{Binding CommandSave}" Grid.Row="0" Grid.Column="2" Content="SAVE" Width="100" Height="40"/>
+        <Grid HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1">
+            <Grid Margin="10,10,0,0" VerticalAlignment="Top">
+                <TextBox x:Name="txtName" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap" Text="{Binding inputName}" VerticalAlignment="Center" Width="120" VerticalContentAlignment="Center">
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding active}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Padding="3,3,0,0" IsHitTestVisible="False" Text="Name" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="DarkGray" Margin="0,0,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=txtName}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+            <Button x:Name="btnStart" Command="{Binding CommandStart}" Content="Start" HorizontalAlignment="Left" Margin="135,10,0,0" VerticalAlignment="Top" Width="75" Height="22">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="IsEnabled" Value="True"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding active}" Value="true">
+                                <Setter Property="Background" Value="Green"/>
+                                <Setter Property="IsHitTestVisible" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Text, ElementName=txtName}" Value="">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button x:Name="btnPauseToggle" Command="{Binding CommandPause}" Content="⏯" HorizontalAlignment="Left" Margin="215,10,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" Width="22" Height="22">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="IsEnabled" Value="True"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.isPaused, ElementName=TimeTrackerWindow}" Value="true">
+                                <Setter Property="Background" Value="Red"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding active}" Value="false">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Button x:Name="btnEnd" Command="{Binding CommandFinish}" Content="Stop+Save" HorizontalAlignment="Left" Margin="242,10,0,0" VerticalAlignment="Top" Width="75" Height="22">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="IsEnabled" Value="True"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding active}" Value="false">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding isPaused}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button x:Name="btnCancel" Command="{Binding CommandCancel}" Content="❌" HorizontalAlignment="Left" Margin="322,10,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="22" Height="22">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="IsEnabled" Value="True"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=txtName}" Value="">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Grid VerticalAlignment="Top" Margin="10,37,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="43*"/>
+                    <ColumnDefinition Width="291*"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="txtComments" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="{Binding inputComments}" Width="334" VerticalContentAlignment="Center" Grid.ColumnSpan="2">
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=txtName}" Value="">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Padding="3,3,0,0" IsHitTestVisible="False" Text="Comments" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="DarkGray" Margin="0,0,0,0" Grid.ColumnSpan="2">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=txtComments}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="1" Margin="50,0,50,10" Grid.ColumnSpan="3">
+            <ScrollViewer>
+                <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding loggedTasks}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Background="Black">
+                                <Grid Margin="2,2,2,1" Background="White">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="350"/>
+                                        <ColumnDefinition Width="50"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="{Binding name}" Grid.Column="0" FontSize="16" FontWeight="bold"/>
+                                    <Label Content="{Binding variableTimeDisplay}" FontSize="16" Grid.Column="1"/>
+                                    <Label Content="{Binding comments}" Grid.Column="2" VerticalAlignment="Center"/>
+                                    <Button Grid.Column="3" Width="50" Height="22" Content="Delete" Command="{Binding DataContext.CommandDelete, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
+                                </Grid>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+
+</Window>
