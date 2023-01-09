@@ -17,44 +17,40 @@ namespace TimeTracker
         public TimeSpan timePaused { get; set; }
         DateTime pauseStart { get; set; }
         DateTime pauseEnd { get; set; }
+        public TimeSpan timeTaken { get; set; }
         double hoursTaken
         {
             get
             {
-                if (timePaused != null && timePaused.Hours > 0) return end.Subtract(start).Hours - timePaused.Hours;
-                return end.Subtract(start).Hours;
+                return timeTaken.Hours;
             }
         }
         double minutesTaken
         {
             get
             {
-                if (timePaused != null && timePaused.Minutes > 0) return end.Subtract(start).Minutes - timePaused.Minutes;
-                return end.Subtract(start).Minutes;
+                return timeTaken.Minutes;
             }
         }
         public double totalHoursTaken
         {
             get
             {
-                if (timePaused != null && timePaused.TotalHours > 0) return end.Subtract(start).TotalHours - timePaused.TotalHours;
-                return end.Subtract(start).TotalHours - timePaused.TotalHours;
+                return timeTaken.Hours;
             }
         }
         public double totalMinutesTaken
         {
             get
             {
-                if (timePaused != null && timePaused.TotalMinutes > 0) return end.Subtract(start).TotalMinutes - timePaused.TotalMinutes;
-                return end.Subtract(start).TotalMinutes;
+                return timeTaken.TotalMinutes;
             }
         }
         public double totalSecondsTaken
         {
             get
             {
-                if (timePaused != null && timePaused.TotalSeconds > 0) return end.Subtract(start).TotalSeconds - timePaused.TotalSeconds;
-                return end.Subtract(start).TotalSeconds;
+                return timeTaken.TotalSeconds;
             }
         }
         public string totalTimeTakenHoursAndMinutes
@@ -84,17 +80,20 @@ namespace TimeTracker
         {
             name = _name;
             start = DateTime.Now;
+            timeTaken = new TimeSpan(0);
         }
         public TimeItem(string _name, DateTime _start)
         {
             name = _name;
             start = _start;
+            timeTaken = new TimeSpan(0);
         }
         public TimeItem(string _name, DateTime _start, DateTime _end)
         {
             name = _name;
             start = _start;
             end = _end;
+            timeTaken = new TimeSpan(0);
         }
         public TimeItem(TimeItem _item)
         {
@@ -105,6 +104,7 @@ namespace TimeTracker
             pauseStart = _item.pauseStart;
             pauseEnd = _item.pauseEnd;
             timePaused = _item.timePaused;
+            timeTaken = _item.timeTaken;
         }
         public void SetStart(DateTime _start)
         {
@@ -114,9 +114,24 @@ namespace TimeTracker
         {
             end = _end;
         }
-        public void Finished()
+        public void Finished(bool newPause = true)
         {
-            end = DateTime.Now;
+            if (newPause) end = DateTime.Now;
+            if (timePaused != null && timePaused.TotalSeconds > 0)
+            {
+                if (timeTaken != null && timeTaken.TotalSeconds > 0) timeTaken = timeTaken.Add(end.Subtract(start).Subtract(timePaused));
+                else timeTaken = end.Subtract(start).Subtract(timePaused);
+            }
+            else
+            {
+                if (timeTaken != null && timeTaken.TotalSeconds > 0) timeTaken = timeTaken.Add(end.Subtract(start));
+                else timeTaken = end.Subtract(start);
+            }
+            pauseStart = new DateTime();
+            pauseEnd = new DateTime();
+            timePaused = new TimeSpan();
+            start = new DateTime();
+            end = new DateTime();
         }
         public void ChangeName(string _name)
         {

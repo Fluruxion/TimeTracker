@@ -37,6 +37,7 @@ namespace TimeTracker
         private ICommand _CommandFinish { get; set; }
         private ICommand _CommandCancel { get; set; }
         private ICommand _CommandDelete { get; set; }
+        private ICommand _CommandContinue { get; set; }
         private ICommand _CommandSave { get; set; }
         public string timer
         {
@@ -109,6 +110,18 @@ namespace TimeTracker
                 }
 
                 return _CommandDelete;
+            }
+        }
+        public ICommand CommandContinue
+        {
+            get
+            {
+                if (_CommandContinue == null)
+                {
+                    _CommandContinue = new DelegateCommand<string>(p => ContinueLoggedTask(p));
+                }
+
+                return _CommandContinue;
             }
         }
         public ICommand CommandSave
@@ -198,6 +211,18 @@ namespace TimeTracker
             dispatcherTimer.Interval = new TimeSpan(0, 0, 10);
         }
 
+        public void RefreshScreen()
+        {
+            OnPropertyChanged("loggedTasks");
+            OnPropertyChanged("inputComments");
+            OnPropertyChanged("inputName");
+            OnPropertyChanged("isPaused");
+            OnPropertyChanged("loggedTasks");
+            OnPropertyChanged("currentTask");
+            OnPropertyChanged("timer");
+
+        }
+
         public void PauseTask()
         {
             if (currentTask == null) return;
@@ -224,8 +249,8 @@ namespace TimeTracker
         {
             List<TimeItem> _items = new List<TimeItem>();
             if (currentTask == null) currentTask = new TimeItem(inputName, DateTime.Now);
-            currentTask.SetEnd(DateTime.Now);
             currentTask.SetComment(inputComments);
+            currentTask.Finished();
             _items.AddRange(loggedTasks);
             if (_items.FindIndex(x => x.name == currentTask.name) != -1) currentTask.name += CountMatches(_items, currentTask.name).ToString();
             _items.Add(new TimeItem(currentTask));
@@ -264,6 +289,22 @@ namespace TimeTracker
             //loggedTasks.RemoveAt(loggedTasks.FindIndex(x => x.name == _name));
 
             loggedTasks = _items;
+        }
+        public void ContinueLoggedTask(string _name)
+        {
+
+            TimeItem tempCurrentTask = loggedTasks.Find(x => x.name == _name);
+            inputName = tempCurrentTask.name;
+            inputComments = tempCurrentTask.comments;
+
+            StartTask();
+
+            currentTask = tempCurrentTask;
+            currentTask.SetStart(DateTime.Now);
+
+            DeleteLoggedTask(_name);
+
+            RefreshScreen();
         }
         private void UpdateTimer(object sender, EventArgs e)
         {

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TimeTracker"
         mc:Ignorable="d"
         x:Name="TimeTrackerWindow"
-        Title="Time Tracker" Height="450" Width="800">
+        Title="Time Tracker" Height="450" Width="900">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
@@ -144,12 +144,14 @@
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="100"/>
                                         <ColumnDefinition Width="350"/>
-                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="60"/>
                                     </Grid.ColumnDefinitions>
                                     <Label Content="{Binding name}" Grid.Column="0" FontSize="16" FontWeight="bold"/>
                                     <Label Content="{Binding variableTimeDisplay}" FontSize="16" Grid.Column="1"/>
                                     <Label Content="{Binding comments}" Grid.Column="2" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="3" Width="50" Height="22" Content="Delete" Command="{Binding DataContext.CommandDelete, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
+                                    <Button Grid.Column="3" Width="60" Height="22" Content="Continue" Command="{Binding DataContext.CommandContinue, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
+                                    <Button Grid.Column="4" Width="50" Height="22" Content="Delete" Command="{Binding DataContext.CommandDelete, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
                                 </Grid>
                             </Grid>
                         </DataTemplate>
