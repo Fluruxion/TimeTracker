@@ -13,6 +13,8 @@ namespace TimeTracker
 {
     class MainWindowViewModel : ObservableObject
     {
+        ModifyTimeWindow popupView { get; set; }
+        ModifyTimeWindowViewModel popupViewModel { get; set; }
         DispatcherTimer dispatcherTimer { get; set; }
         private TimeItem _currentTask { get; set; }
         private List<TimeItem> _loggedTasks { get; set; }
@@ -39,6 +41,10 @@ namespace TimeTracker
         private ICommand _CommandDelete { get; set; }
         private ICommand _CommandContinue { get; set; }
         private ICommand _CommandSave { get; set; }
+        private ICommand _CommandEdit { get; set; }
+        private ICommand _CommandRefresh { get; set; }
+        private ICommand _CommandClosePopup { get; set; }
+
         public string timer
         {
             get
@@ -136,6 +142,42 @@ namespace TimeTracker
                 return _CommandSave;
             }
         }
+        public ICommand CommandEdit
+        {
+            get
+            {
+                if (_CommandEdit == null)
+                {
+                    _CommandEdit = new DelegateCommand<string>(p => EditLoggedTask(p));
+                }
+
+                return _CommandEdit;
+            }
+        }
+        public ICommand CommandRefresh
+        {
+            get
+            {
+                if (_CommandRefresh == null)
+                {
+                    _CommandRefresh = new DelegateCommand(p => RefreshScreen());
+                }
+
+                return _CommandRefresh;
+            }
+        }
+        public ICommand CommandClosePopup
+        {
+            get
+            {
+                if (_CommandClosePopup == null)
+                {
+                    _CommandClosePopup = new DelegateCommand(p => ClosePopup());
+                }
+
+                return _CommandClosePopup;
+            }
+        }
         public TimeItem currentTask {
             get
             {
@@ -213,6 +255,9 @@ namespace TimeTracker
 
         public void RefreshScreen()
         {
+            List<TimeItem> _logged = new List<TimeItem>();
+            _logged.AddRange(loggedTasks);
+            loggedTasks = _logged;
             OnPropertyChanged("loggedTasks");
             OnPropertyChanged("inputComments");
             OnPropertyChanged("inputName");
@@ -220,7 +265,6 @@ namespace TimeTracker
             OnPropertyChanged("loggedTasks");
             OnPropertyChanged("currentTask");
             OnPropertyChanged("timer");
-
         }
 
         public void PauseTask()
@@ -306,6 +350,14 @@ namespace TimeTracker
 
             RefreshScreen();
         }
+        public void EditLoggedTask(string _name)
+        {
+            TimeItem editItem = loggedTasks.Find(x => x.name == _name);
+            popupView = new ModifyTimeWindow();
+            popupViewModel = new ModifyTimeWindowViewModel(ref editItem, CommandRefresh, CommandClosePopup);
+            popupView.DataContext = popupViewModel;
+            popupView.Show();
+        }
         private void UpdateTimer(object sender, EventArgs e)
         {
             OnPropertyChanged("timer");
@@ -320,13 +372,19 @@ namespace TimeTracker
             {
                 totalHours += item.totalHoursTaken;
                 totalSeconds += item.totalSecondsTaken;
-                output += string.Format("\"{0}\",\"{1:F2}\",\"{2}\",\"{3}\",\n", item.name, item.totalHoursTaken, item.comments, item.end);
+                output += string.Format("\"{0}\",\"{1:F2}\",\"{2}\",\"{3}\",\n", item.name, item.totalHoursTaken, item.comments, item.lastSaved);
             }
             
             output += string.Format("\n\"Total:\",\"{0:F2}\",\n", totalHours);
             output += string.Format("\"\",\"Above value ignores rounding from each of the individual tasks, it's completely accurate as a total\",\n");
-            string fileLocation = string.Format(@"C:\Users\alex\Desktop\{0}{1}{2}-{3}{4}{5}.CSV", DateTime.Now.Date.Day, DateTime.Now.Date.Month, DateTime.Now.Date.Year, DateTime.Now.TimeOfDay.Hours, DateTime.Now.TimeOfDay.Minutes, DateTime.Now.TimeOfDay.Seconds);
+            string fileLocation = string.Format(@"C:\Users\alex\Desktop\Timesheets\Created\{0}-{1}-{2}--{3}{4}{5}.CSV", DateTime.Now.Date.Year, DateTime.Now.Date.Month, DateTime.Now.Date.Day, DateTime.Now.TimeOfDay.Hours, DateTime.Now.TimeOfDay.Minutes, DateTime.Now.TimeOfDay.Seconds);
             File.WriteAllText(fileLocation, output);
+        }
+        private void ClosePopup()
+        {
+            popupView.Close();
+            popupView = null;
+            popupViewModel = null;
         }
     }
 }

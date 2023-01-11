@@ -18,6 +18,7 @@ namespace TimeTracker
         DateTime pauseStart { get; set; }
         DateTime pauseEnd { get; set; }
         public TimeSpan timeTaken { get; set; }
+        public DateTime lastSaved { get; set; }
         double hoursTaken
         {
             get
@@ -36,7 +37,7 @@ namespace TimeTracker
         {
             get
             {
-                return timeTaken.Hours;
+                return timeTaken.TotalHours;
             }
         }
         public double totalMinutesTaken
@@ -105,6 +106,7 @@ namespace TimeTracker
             pauseEnd = _item.pauseEnd;
             timePaused = _item.timePaused;
             timeTaken = _item.timeTaken;
+            lastSaved = _item.lastSaved;
         }
         public void SetStart(DateTime _start)
         {
@@ -113,6 +115,7 @@ namespace TimeTracker
         public void SetEnd(DateTime _end)
         {
             end = _end;
+            lastSaved = end;
         }
         public void Finished(bool newPause = true)
         {
@@ -127,6 +130,7 @@ namespace TimeTracker
                 if (timeTaken != null && timeTaken.TotalSeconds > 0) timeTaken = timeTaken.Add(end.Subtract(start));
                 else timeTaken = end.Subtract(start);
             }
+            lastSaved = end;
             pauseStart = new DateTime();
             pauseEnd = new DateTime();
             timePaused = new TimeSpan();
