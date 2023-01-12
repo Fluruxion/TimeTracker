@@ -364,6 +364,9 @@ namespace TimeTracker
         }
         private void SaveCSV()
         {
+            string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+            Microsoft.Win32.SaveFileDialog saveFile = new Microsoft.Win32.SaveFileDialog();
             string output = "";
             double totalHours = 0;
             double totalSeconds = 0;
@@ -377,8 +380,15 @@ namespace TimeTracker
             
             output += string.Format("\n\"Total:\",\"{0:F2}\",\n", totalHours);
             output += string.Format("\"\",\"Above value ignores rounding from each of the individual tasks, it's completely accurate as a total\",\n");
-            string fileLocation = string.Format(@"C:\Users\alex\Desktop\Timesheets\Created\{0}-{1}-{2}--{3}{4}{5}.CSV", DateTime.Now.Date.Year, DateTime.Now.Date.Month, DateTime.Now.Date.Day, DateTime.Now.TimeOfDay.Hours, DateTime.Now.TimeOfDay.Minutes, DateTime.Now.TimeOfDay.Seconds);
-            File.WriteAllText(fileLocation, output);
+            string fileName = string.Format(@"{0}-{1}-{2}-{3}{4}{5}.CSV", DateTime.Now.Date.Day, DateTime.Now.Date.Month, DateTime.Now.Date.Year, DateTime.Now.TimeOfDay.Hours, DateTime.Now.TimeOfDay.Minutes, DateTime.Now.TimeOfDay.Seconds);
+            saveFile.FileName = fileName;
+            saveFile.DefaultExt = ".CSV";
+            saveFile.Filter = "Comma Seperated Values (.CSV)|*.CSV*";
+            saveFile.InitialDirectory = desktop;
+            if (saveFile.ShowDialog() == true)
+            {
+                File.WriteAllText(saveFile.FileName, output);
+            }
         }
         private void ClosePopup()
         {
