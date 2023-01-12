@@ -44,6 +44,7 @@ namespace TimeTracker
         private ICommand _CommandEdit { get; set; }
         private ICommand _CommandRefresh { get; set; }
         private ICommand _CommandClosePopup { get; set; }
+        private ICommand _CommandImportCSV { get; set; }
 
         public string timer
         {
@@ -176,6 +177,18 @@ namespace TimeTracker
                 }
 
                 return _CommandClosePopup;
+            }
+        }
+        public ICommand CommandImportCSV
+        {
+            get
+            {
+                if (_CommandImportCSV == null)
+                {
+                    _CommandImportCSV = new DelegateCommand(p => OpenCSV());
+                }
+
+                return _CommandImportCSV;
             }
         }
         public TimeItem currentTask {
@@ -370,16 +383,15 @@ namespace TimeTracker
             string output = "";
             double totalHours = 0;
             double totalSeconds = 0;
-            output += "\"Task\",\"Hours Taken (2 Decimal Places)\",\"Comments\",\"Date & Time Completed\",\n";
+            output += "Task,Hours Taken (2 Decimal Places),Comments,Date & Time Completed,\n";
             foreach (TimeItem item in loggedTasks)
             {
                 totalHours += item.totalHoursTaken;
                 totalSeconds += item.totalSecondsTaken;
-                output += string.Format("\"{0}\",\"{1:F2}\",\"{2}\",\"{3}\",\n", item.name, item.totalHoursTaken, item.comments, item.lastSaved);
+                output += string.Format("{0},{1:F2},{2},{3},\n", item.name, item.totalHoursTaken, item.comments, item.lastSaved);
             }
             
-            output += string.Format("\n\"Total:\",\"{0:F2}\",\n", totalHours);
-            output += string.Format("\"\",\"Above value ignores rounding from each of the individual tasks, it's completely accurate as a total\",\n");
+            output += string.Format("\nTotal:,{0:F2},\n", totalHours);
             string fileName = string.Format(@"{0}-{1}-{2}-{3}{4}{5}.CSV", DateTime.Now.Date.Day, DateTime.Now.Date.Month, DateTime.Now.Date.Year, DateTime.Now.TimeOfDay.Hours, DateTime.Now.TimeOfDay.Minutes, DateTime.Now.TimeOfDay.Seconds);
             saveFile.FileName = fileName;
             saveFile.DefaultExt = ".CSV";
@@ -395,6 +407,48 @@ namespace TimeTracker
             popupView.Close();
             popupView = null;
             popupViewModel = null;
+        }
+        private void OpenCSV()
+        {
+            string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+            Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
+
+            openFile.DefaultExt = ".CSV";
+            openFile.Filter = "Comma Seperated Values (.CSV)|*.CSV*";
+            openFile.InitialDirectory = desktop;
+
+            if (openFile.ShowDialog() == true)
+            {
+                List<string> fileInput = File.ReadLines(openFile.FileName).ToList();
+
+                int count = 0;
+
+                List<TimeItem> importedItems = new List<TimeItem>();
+
+                foreach (string line in fileInput)
+                {
+                    count++;
+
+                    if (count == 1) continue;
+
+                    string[] splitLine = line.Split(',');
+
+                    if (splitLine[0].ToLower() == "" || splitLine[0].ToLower().Contains("total")) break;
+
+
+                    importedItems.Add(new TimeItem(splitLine[0], splitLine[1], splitLine[2], splitLine[3]));
+                }
+
+                List<TimeItem> _logged = new List<TimeItem>();
+                _logged.AddRange(loggedTasks);
+                _logged.AddRange(importedItems);
+
+                loggedTasks = _logged;
+
+                RefreshScreen();
+            }
+            else return;
         }
     }
 }

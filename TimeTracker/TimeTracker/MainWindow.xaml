@@ -18,7 +18,14 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Label Grid.Row="0" Grid.Column="0" Content="{Binding timer}" Width="100" VerticalAlignment="Center" FontSize="18" FontWeight="Bold"/>
-        <Button Command="{Binding CommandSave}" Grid.Row="0" Grid.Column="2" Content="SAVE" Width="100" Height="40"/>
+        <Grid Grid.Row="0" Grid.Column="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Button Command="{Binding CommandSave}" Grid.Column="0" Content="SAVE" Width="100" Height="40"/>
+            <Button Command="{Binding CommandImportCSV}" Grid.Column="1" Content="OPEN" Width="50" Height="40"/>
+        </Grid>
         <Grid HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1">
             <Grid Margin="10,10,0,0" VerticalAlignment="Top">
                 <TextBox x:Name="txtName" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap" Text="{Binding inputName}" VerticalAlignment="Center" Width="120" VerticalContentAlignment="Center">

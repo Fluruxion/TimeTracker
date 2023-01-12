@@ -108,6 +108,32 @@ namespace TimeTracker
             timeTaken = _item.timeTaken;
             lastSaved = _item.lastSaved;
         }
+        public TimeItem(string _taskName, string _hoursTaken, string _comments, string _dateTimeCompleted)
+        {
+            name = _taskName;
+
+            double parsedHours = 0;
+            if (double.TryParse(_hoursTaken, out parsedHours))
+            {
+                timeTaken = TimeSpan.FromHours(parsedHours);
+            }
+            else
+            {
+                timeTaken = new TimeSpan(0, 0, 0);
+            }
+
+            comments = _comments;
+
+            DateTime parsedDateTimeCompleted = new DateTime();
+            if (DateTime.TryParse(_dateTimeCompleted, out parsedDateTimeCompleted))
+            {
+                lastSaved = parsedDateTimeCompleted;
+            }
+            else
+            {
+                lastSaved = DateTime.Now;
+            }
+        }
         public void SetStart(DateTime _start)
         {
             start = _start;
