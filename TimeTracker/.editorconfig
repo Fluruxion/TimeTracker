@@ -1,0 +1,22 @@
+﻿[*.cs]
+
+# VSTHRD012: Provide JoinableTaskFactory where allowed
+dotnet_diagnostic.VSTHRD012.severity = none
+
+# IDE0011: Add braces
+dotnet_diagnostic.IDE0011.severity = none
+
+# IDE0001: Simplify Names
+dotnet_diagnostic.IDE0001.severity = none
+
+# IDE1006: Naming Styles
+dotnet_diagnostic.IDE1006.severity = none
+
+# IDE0027: Use expression body for accessors
+dotnet_diagnostic.IDE0027.severity = none
+
+# IDE0040: Add accessibility modifiers
+dotnet_diagnostic.IDE0040.severity = none
+
+# IDE0005: Using directive is unnecessary.
+dotnet_diagnostic.IDE0005.severity = none

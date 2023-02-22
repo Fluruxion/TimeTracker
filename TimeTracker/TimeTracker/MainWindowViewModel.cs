@@ -55,7 +55,7 @@ namespace TimeTracker
 
                 TimeSpan test = DateTime.Now.Subtract(currentTask.start);
                 if (currentTask.timePaused != null) test = test.Subtract(currentTask.timePaused);
-                
+
                 return string.Format("{0:#0} Hours\n{1:#0} Minutes", test.Hours, test.Minutes);
             }
         }
@@ -191,7 +191,8 @@ namespace TimeTracker
                 return _CommandImportCSV;
             }
         }
-        public TimeItem currentTask {
+        public TimeItem currentTask
+        {
             get
             {
                 return _currentTask;
@@ -390,7 +391,7 @@ namespace TimeTracker
                 totalSeconds += item.totalSecondsTaken;
                 output += string.Format("{0},{1:F2},{2},{3},\n", item.name, item.totalHoursTaken, item.comments, item.lastSaved);
             }
-            
+
             output += string.Format("\nTotal:,{0:F2},\n", totalHours);
             string fileName = string.Format(@"{0}-{1}-{2}-{3}{4}{5}.CSV", DateTime.Now.Date.Day, DateTime.Now.Date.Month, DateTime.Now.Date.Year, DateTime.Now.TimeOfDay.Hours, DateTime.Now.TimeOfDay.Minutes, DateTime.Now.TimeOfDay.Seconds);
             saveFile.FileName = fileName;
