@@ -416,6 +416,7 @@ namespace TimeTracker
         /// <summary>
         /// Creates a .csv file containing the data of all logged tasks. Layout is made to fit requirements for current employment.
         /// Does this by simply appending text to an output string and saving as required.
+        /// Might be worth saving the most recent save location to registry so it re-opens at the same place next time the user attempts to save a file?
         /// </summary>
         private void SaveCSV()
         {
