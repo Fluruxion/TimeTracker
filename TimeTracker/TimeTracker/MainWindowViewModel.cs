@@ -53,10 +53,10 @@ namespace TimeTracker
                 // Using actual time as the Dispatch timer doesn't appear to trigger exactly as expected which results in a wobbly timer unless checking datetime.now and comparing to start time
                 if (currentTask == null) return "0 Hours\n0 Minutes";
 
-                TimeSpan test = DateTime.Now.Subtract(currentTask.start);
-                if (currentTask.timePaused != null) test = test.Subtract(currentTask.timePaused);
+                TimeSpan currentTimeDisplay = DateTime.Now.Subtract(currentTask.start);
+                if (currentTask.timePaused != null) currentTimeDisplay = currentTimeDisplay.Subtract(currentTask.timePaused);
 
-                return string.Format("{0:#0} Hours\n{1:#0} Minutes", test.Hours, test.Minutes);
+                return string.Format("{0:#0} Hours\n{1:#0} Minutes", currentTimeDisplay.Hours, currentTimeDisplay.Minutes);
             }
         }
         public ICommand CommandPause
@@ -256,19 +256,20 @@ namespace TimeTracker
         {
             isPaused = false;
             loggedTasks = new List<TimeItem>();
-            /*loggedTasks.Add(new TimeItem("TaskName", DateTime.Now, DateTime.Now.AddMinutes(30)));
-            loggedTasks.Add(new TimeItem("TaskName2", DateTime.Now, DateTime.Now.AddSeconds(150)));
-            loggedTasks.Add(new TimeItem("TaskName3", DateTime.Now, DateTime.Now.AddHours(1).AddMinutes(30)));
-            loggedTasks.Add(new TimeItem("TaskName4", DateTime.Now, DateTime.Now.AddHours(1)));*/
+            
             OnPropertyChanged("loggedTasks");
 
+            // This timer is used to update the label presenting the currentTimeDisplay value. It measures in minutes so don't need to set the interval too low.
             dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(UpdateTimer);
             dispatcherTimer.Interval = new TimeSpan(0, 0, 10);
         }
-
+        /// <summary>
+        /// This is the main method used to update the screen whenever we want all the information to be updated at once instead of a small section.
+        /// </summary>
         public void RefreshScreen()
         {
+            // Re-assign the list into loggedTasks so that the UI is able to grab the new information, otherwise OnPropertyChanged does nothing with it
             List<TimeItem> _logged = new List<TimeItem>();
             _logged.AddRange(loggedTasks);
             loggedTasks = _logged;
@@ -281,6 +282,9 @@ namespace TimeTracker
             OnPropertyChanged("timer");
         }
 
+        /// <summary>
+        /// Pauses or unpauses the currently tracked task depending on the value of isPaused
+        /// </summary>
         public void PauseTask()
         {
             if (currentTask == null) return;
@@ -297,12 +301,22 @@ namespace TimeTracker
                 dispatcherTimer.Start();
             }
         }
+        /// <summary>
+        /// Creates a new TimeItem and sets it as the current task
+        /// </summary>
         public void StartTask()
         {
             currentTask = new TimeItem(inputName, DateTime.Now);
             dispatcherTimer.Start();
             active = true;
         }
+        /// <summary>
+        /// Adds the current task to the list of logged tasks and clears the UI to make room for the next one.
+        /// If the current task is somehow blank or invalid it will create a blank task in the list instead. This is done to allow mass creation of tasks for testing.
+        /// It is not possible to "finish" a blank task from the UI as the button to do so is not usable unless there is a currently active task.
+        /// Automatically appends a number to the end of a task name if a task already exists with the same name.
+        /// This was originally done to ensure correct task was selected but also is preferred for timesheet output by employer.
+        /// </summary>
         public void FinishTask()
         {
             List<TimeItem> _items = new List<TimeItem>();
@@ -317,6 +331,13 @@ namespace TimeTracker
             OnPropertyChanged("loggedTasks");
             CancelTask();
         }
+        /// <summary>
+        /// Counts the amount of tasks in the logged task list with the same name as the current task.
+        /// This is used to assign it with a unique name.
+        /// </summary>
+        /// <param name="itemList">This is usually going to be the logged task list, but can be any list of TimeItems provided</param>
+        /// <param name="match">The name we're checking for</param>
+        /// <returns>Returns an int value equal to the amount of times the parameter "match" was found in the provided list of TimeItems</returns>
         private int CountMatches(List<TimeItem> itemList, string match)
         {
             int count = 0;
@@ -326,18 +347,25 @@ namespace TimeTracker
             }
             return count;
         }
+        /// <summary>
+        /// Clears the current task UI and associated data/values to prepare it for the next task.
+        /// </summary>
         public void CancelTask()
         {
             currentTask = null;
             inputComments = "";
             inputName = "";
             isPaused = false;
-            //OnPropertyChanged("inputComments");
-            //OnPropertyChanged("inputName");
             dispatcherTimer.Stop();
             OnPropertyChanged("timer");
             active = false;
         }
+        /// <summary>
+        /// Deletes the logged task which matches the provided name. This is usually called from the UI where it passes it's own name through the ICommand as a parameter.
+        /// Could probably update this to be cleaner by passing through the TimeItem itself to prevent the need for protecting against duplicate names.
+        /// Might be worth investigating later, though this currently works without issue and there is no pressing reason to change it. Unique names is also preferable for current timesheet outputs.
+        /// </summary>
+        /// <param name="_name">The name of the TimeItem to delete</param>
         public void DeleteLoggedTask(string _name)
         {
             List<TimeItem> _items = new List<TimeItem>();
@@ -348,6 +376,10 @@ namespace TimeTracker
 
             loggedTasks = _items;
         }
+        /// <summary>
+        /// Sets a logged TimeItem as the current TimeItem.
+        /// </summary>
+        /// <param name="_name">The name of the TimeItem to set as current</param>
         public void ContinueLoggedTask(string _name)
         {
 
@@ -364,6 +396,11 @@ namespace TimeTracker
 
             RefreshScreen();
         }
+        /// <summary>
+        /// Allows manual editing of the hours of a task. Useful if task was left ongoing by mistake or if adding a task that has a known duration that does not currently exist in logged tasks.
+        /// Opens a new window with the required UI to edit the timings, this is due to space constraints on the main window.
+        /// </summary>
+        /// <param name="_name">Name of TimeItem to modify</param>
         public void EditLoggedTask(string _name)
         {
             TimeItem editItem = loggedTasks.Find(x => x.name == _name);
@@ -376,6 +413,10 @@ namespace TimeTracker
         {
             OnPropertyChanged("timer");
         }
+        /// <summary>
+        /// Creates a .csv file containing the data of all logged tasks. Layout is made to fit requirements for current employment.
+        /// Does this by simply appending text to an output string and saving as required.
+        /// </summary>
         private void SaveCSV()
         {
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -403,12 +444,21 @@ namespace TimeTracker
                 File.WriteAllText(saveFile.FileName, output);
             }
         }
+        /// <summary>
+        /// This closes the edit TimeItem popup which is used to edit the timings of a logged TimeItem.
+        /// A command which calls this method is passed into the popup constructor when it is created.
+        /// </summary>
         private void ClosePopup()
         {
             popupView.Close();
             popupView = null;
             popupViewModel = null;
         }
+        /// <summary>
+        /// Allows the user to open a previously created .csv file with an expected format and add all entries to the logged tasks list as TimeItems.
+        /// Useful for creating timesheets that span over more than just a day. Was added to match requirement of submitting 1 timesheet per month.
+        /// Might be worth investigating a way to simply append to a specified timesheet instead of having to import it each time, though this works for now and I've had no issues with it.
+        /// </summary>
         private void OpenCSV()
         {
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
