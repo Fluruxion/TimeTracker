@@ -11,6 +11,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -168,6 +169,8 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
+        <Label Grid.Row="2" Grid.Column="2" Content="{Binding TotalTimeTakenDisplay}" FontWeight="Bold"/>
+
     </Grid>
 
 </Window>

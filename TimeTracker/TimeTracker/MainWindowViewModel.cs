@@ -34,6 +34,35 @@ namespace TimeTracker
                 OnPropertyChanged("active");
             }
         }
+        private TimeSpan TotalTimeMinusActive
+        {
+            get
+            {
+                if (loggedTasks == null || loggedTasks.Count == 0) return new TimeSpan();
+
+                TimeSpan tempTotal = new TimeSpan(0, 0, 0);
+
+                foreach (TimeItem item in loggedTasks)
+                {
+                    tempTotal = tempTotal.Add(item.timeTaken);
+                }
+
+                return tempTotal;
+            }
+        }
+        private string _TotalTimeTakenDisplay { get; set; }
+        public string TotalTimeTakenDisplay
+        {
+            get
+            {
+                return _TotalTimeTakenDisplay;
+            }
+            set
+            {
+                _TotalTimeTakenDisplay = value;
+                OnPropertyChanged("TotalTimeTakenDisplay");
+            }
+        }
         private ICommand _CommandPause { get; set; }
         private ICommand _CommandStart { get; set; }
         private ICommand _CommandFinish { get; set; }
@@ -256,7 +285,7 @@ namespace TimeTracker
         {
             isPaused = false;
             loggedTasks = new List<TimeItem>();
-            
+
             OnPropertyChanged("loggedTasks");
 
             // This timer is used to update the label presenting the currentTimeDisplay value. It measures in minutes so don't need to set the interval too low.
@@ -329,6 +358,7 @@ namespace TimeTracker
             isPaused = false;
             loggedTasks = _items;
             OnPropertyChanged("loggedTasks");
+            UpdateTotalTimeTakenDisplay();
             CancelTask();
         }
         /// <summary>
@@ -413,6 +443,17 @@ namespace TimeTracker
         {
             OnPropertyChanged("timer");
         }
+
+        /// <summary>
+        /// Updates a label beneath the loggedtasks list to represent the total time taken of all logged tasks.
+        /// </summary>
+        private void UpdateTotalTimeTakenDisplay()
+        {
+            if (TotalTimeMinusActive.TotalSeconds < 60) TotalTimeTakenDisplay = string.Format("Logged: {0:##} seconds", TotalTimeMinusActive.TotalSeconds);
+            else if (TotalTimeMinusActive.TotalMinutes < 60) TotalTimeTakenDisplay = string.Format("Logged: {0:##.#} minutes", TotalTimeMinusActive.TotalMinutes);
+            else TotalTimeTakenDisplay = string.Format("Logged: {0} hours, {1} minutes", TotalTimeMinusActive.Hours, TotalTimeMinusActive.Minutes);
+        }
+
         /// <summary>
         /// Creates a .csv file containing the data of all logged tasks. Layout is made to fit requirements for current employment.
         /// Does this by simply appending text to an output string and saving as required.
@@ -454,6 +495,7 @@ namespace TimeTracker
             popupView.Close();
             popupView = null;
             popupViewModel = null;
+            UpdateTotalTimeTakenDisplay();
         }
         /// <summary>
         /// Allows the user to open a previously created .csv file with an expected format and add all entries to the logged tasks list as TimeItems.
