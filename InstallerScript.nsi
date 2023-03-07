@@ -1,0 +1,298 @@
+; Installer script for the TimeTracker application
+; All paths are relative to the directory containing this file
+; This was originally an NSI example file which has been edited to match the requirements for the installer
+
+!include LogicLib.nsh
+
+Icon "TimeTracker\TimeTracker\TimeTrackerLOGO2.ico"
+
+;--------------------------------
+
+; The name of the installer
+Name "TimeTracker"
+
+; The file to write
+OutFile "TimeTracker.exe"
+
+; Request application privileges for Windows Vista and higher
+RequestExecutionLevel none
+
+; Build Unicode installer
+Unicode True
+
+; The default installation directory
+InstallDir $PROGRAMFILES\TimeTracker
+
+; Registry key to check for directory (so if you install again, it will 
+; overwrite the old one automatically)
+InstallDirRegKey HKLM "Software\TimeTracker" "Install_Dir"
+
+;--------------------------------
+
+; Pages
+
+Page components
+Page directory
+Page instfiles
+
+UninstPage uninstConfirm
+UninstPage instfiles
+
+;--------------------------------
+
+ Function CheckAndDownloadDotNet472
+	# Let's see if the user has the .NET Framework 4.7.2 installed on their system or not
+	# Remember: you need Vista SP2 or 7 SP1.  It is built in to Windows 8, and not needed
+	# In case you're wondering, running this code on Windows 8 will correctly return is_equal
+	# or is_greater (maybe Microsoft releases .NET 4.7.2 SP1 for example)
+ 
+	# Set up our Variables
+	Var /GLOBAL dotNET472IsThere
+	Var /GLOBAL dotNET_CMD_LINE
+	Var /GLOBAL EXIT_CODE
+ 
+        # We are reading a version release DWORD that Microsoft says is the documented
+        # way to determine if .NET Framework 4.7.2 is installed
+	ReadRegDWORD $dotNET472IsThere HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Release"
+	IntCmp $dotNET472IsThere 461808 is_equal is_less is_greater
+ 
+	is_equal:
+		Goto done_compare_not_needed
+	is_greater:
+		# Useful if, for example, Microsoft releases .NET 4.7.2 SP1
+		# We want to be able to simply skip install since it's not
+		# needed on this system
+		Goto done_compare_not_needed
+	is_less:
+		Goto done_compare_needed
+ 
+	done_compare_needed:
+		#.NET Framework 4.7.2 install is *NEEDED*
+ 
+		# Microsoft Download Center EXE:
+		# Web Bootstrapper: http://go.microsoft.com/fwlink/?LinkId=225704
+		# Full Download: http://go.microsoft.com/fwlink/?LinkId=225702
+ 
+		# Setup looks for components\dotNET45Full.exe relative to the install EXE location
+		# This allows the installer to be placed on a USB stick (for computers without internet connections)
+		# If the .NET Framework 4.7.2 installer is *NOT* found, Setup will connect to Microsoft's website
+		# and download it for you
+ 
+		# Reboot Required with these Exit Codes:
+		# 1641 or 3010
+ 
+		# Command Line Switches:
+		# /showrmui /passive /norestart
+ 
+		# Silent Command Line Switches:
+		# /q /norestart
+ 
+ 
+		# Check for silent install
+		IfSilent is_quiet is_not_quiet
+ 
+		is_quiet:
+			StrCpy $dotNET_CMD_LINE "/q /norestart"
+			Goto LookForLocalFile
+		is_not_quiet:
+			StrCpy $dotNET_CMD_LINE "/showrmui /passive /norestart"
+			Goto LookForLocalFile
+ 
+		LookForLocalFile:
+			# Let's see if the user stored the Full Installer
+			IfFileExists "$INSTDIR\DOTNET4_7_2.exe" do_local_install do_network_install
+ 
+			do_local_install:
+				# .NET Framework found on the local disk.  Use this copy
+ 
+				ExecWait '"$INSTDIR\DOTNET4_7_2.exe" $dotNET_CMD_LINE' $EXIT_CODE
+				Goto is_reboot_requested
+ 
+			# Now, let's Download the .NET
+			do_network_install:
+ 
+				#Var /GLOBAL dotNetDidDownload
+				#NSISdl::download "http://go.microsoft.com/fwlink/?LinkId=225704" "$TEMP\dotNET45Web.exe" $dotNetDidDownload
+ 
+				#StrCmp $dotNetDidDownload success fail
+				#success:
+				#	ExecWait '"$TEMP\dotNET45Web.exe" $dotNET_CMD_LINE' $EXIT_CODE
+				#	Goto is_reboot_requested
+ 
+				#fail:
+				#	MessageBox MB_OK|MB_ICONEXCLAMATION "Unable to download .NET Framework.  ${PRODUCT_NAME} will be installed, but will not function without the Framework!"
+				#	Goto done_dotNET_function
+ 
+				# $EXIT_CODE contains the return codes.  1641 and 3010 means a Reboot has been requested
+			is_reboot_requested:
+				${If} $EXIT_CODE == 1641
+					MessageBox MB_OK "A reboot is required to finish the installation of .NET Framework 4.7.2"
+					SetRebootFlag true
+				${EndIf}
+				${If} $EXIT_CODE == 3010
+					MessageBox MB_OK "A reboot is required to finish the installation of .NET Framework 4.7.2"
+					SetRebootFlag true
+				${EndIf}
+				${If} $EXIT_CODE == 0
+					MessageBox MB_OK ".NET Framework 4.7.2 has now been installed successfully"
+				${EndIf}
+				
+				Goto done_dotNET_function
+ 
+	done_compare_not_needed:
+		# Done dotNET Install
+		Goto done_dotNET_function
+ 
+	#exit the function
+	done_dotNET_function:
+ 
+FunctionEnd
+
+#Function .OnInstSuccess
+#  SetOutPath $INSTDIR
+#  Exec '"$WINDIR\explorer.exe" "$INSTDIR\TimeTracker.exe"'
+#FunctionEnd
+    
+;--------------------------------
+
+; The stuff to install
+Section "TimeTracker"
+
+  SectionIn RO
+  
+  ; Set output path to the installation directory.
+  SetOutPath $INSTDIR
+  
+  ; All files to include in the installer (The contents of bin\release)
+  ; Use script to generate this list so nothing is missed (All dll files and the exe)
+  File "TimeTracker\TimeTracker\bin\Release\MessagePack.Annotations.dll"
+  File "TimeTracker\TimeTracker\bin\Release\MessagePack.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.Bcl.AsyncInterfaces.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.NET.StringTools.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.ServiceHub.Framework.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.VisualStudio.RemoteControl.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.VisualStudio.RpcContracts.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.VisualStudio.Telemetry.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.VisualStudio.Threading.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.VisualStudio.Utilities.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.VisualStudio.Utilities.Internal.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.VisualStudio.Validation.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Microsoft.Win32.Registry.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Nerdbank.Streams.dll"
+  File "TimeTracker\TimeTracker\bin\Release\Newtonsoft.Json.dll"
+  File "TimeTracker\TimeTracker\bin\Release\StreamJsonRpc.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Buffers.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Collections.Immutable.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Composition.AttributedModel.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Composition.Convention.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Composition.Hosting.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Composition.Runtime.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Composition.TypedParts.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Diagnostics.DiagnosticSource.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.IO.Pipelines.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Memory.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Numerics.Vectors.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Runtime.CompilerServices.Unsafe.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Security.AccessControl.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Security.Principal.Windows.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Threading.AccessControl.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Threading.Tasks.Dataflow.dll"
+  File "TimeTracker\TimeTracker\bin\Release\System.Threading.Tasks.Extensions.dll"
+  File "TimeTracker\TimeTracker\bin\Release\TimeTracker.exe"
+
+  SetOverwrite off
+  File "TimeTracker\TimeTracker\bin\Release\TimeTracker.exe.config"
+  SetOverwrite on
+    
+  ; Catch to delete the current uninstall.exe
+  Delete $INSTDIR\uninstall.exe
+  
+  ; Check the version of dot net installed
+  Call CheckAndDownloadDotNet472
+  
+  ; Write the installation path into the registry
+  WriteRegStr HKLM "Software\TimeTracker" "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM "Software\TimeTracker" "Version" "1.0.0"
+  
+  ; Write the uninstall keys for Windows
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "DisplayName" "TimeTracker"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "UninstallString" "$INSTDIR\UninstallTimeTracker.exe"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "NoModify" "1"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "NoRepair" "1"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "DisplayIcon" "$INSTDIR\TimeTracker.exe"
+  WriteUninstaller "$INSTDIR\UninstallTimeTracker.exe"
+  
+SectionEnd
+
+; Optional section (can be disabled by the user)
+Section "Start Menu Shortcuts"
+  SetShellVarContext all
+  CreateShortcut "$SMPROGRAMS\TimeTracker.lnk" "$INSTDIR\TimeTracker.exe"
+  SetShellVarContext current
+SectionEnd
+
+; Optional section (can be disabled by the user)
+Section "Desktop Shortcuts"
+  SetShellVarContext all
+  CreateShortcut "$DESKTOP\TimeTracker.lnk" "$INSTDIR\TimeTracker.exe"
+  SetShellVarContext current
+SectionEnd
+
+
+;--------------------------------
+
+; Uninstaller
+
+Section "Uninstall"
+  
+  ; Remove registry keys
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker"
+  DeleteRegKey HKLM "SOFTWARE\TimeTracker"
+
+  ; Remove files and uninstaller
+  ; Populate this with the same script as the install dir
+  Delete $INSTDIR\UninstallTimeTracker.exe
+  Delete $INSTDIR\MessagePack.Annotations.dll
+  Delete $INSTDIR\MessagePack.dll
+  Delete $INSTDIR\Microsoft.Bcl.AsyncInterfaces.dll
+  Delete $INSTDIR\Microsoft.NET.StringTools.dll
+  Delete $INSTDIR\Microsoft.ServiceHub.Framework.dll
+  Delete $INSTDIR\Microsoft.VisualStudio.RemoteControl.dll
+  Delete $INSTDIR\Microsoft.VisualStudio.RpcContracts.dll
+  Delete $INSTDIR\Microsoft.VisualStudio.Telemetry.dll
+  Delete $INSTDIR\Microsoft.VisualStudio.Threading.dll
+  Delete $INSTDIR\Microsoft.VisualStudio.Utilities.dll
+  Delete $INSTDIR\Microsoft.VisualStudio.Utilities.Internal.dll
+  Delete $INSTDIR\Microsoft.VisualStudio.Validation.dll
+  Delete $INSTDIR\Microsoft.Win32.Registry.dll
+  Delete $INSTDIR\Nerdbank.Streams.dll
+  Delete $INSTDIR\Newtonsoft.Json.dll
+  Delete $INSTDIR\StreamJsonRpc.dll
+  Delete $INSTDIR\System.Buffers.dll
+  Delete $INSTDIR\System.Collections.Immutable.dll
+  Delete $INSTDIR\System.Composition.AttributedModel.dll
+  Delete $INSTDIR\System.Composition.Convention.dll
+  Delete $INSTDIR\System.Composition.Hosting.dll
+  Delete $INSTDIR\System.Composition.Runtime.dll
+  Delete $INSTDIR\System.Composition.TypedParts.dll
+  Delete $INSTDIR\System.Diagnostics.DiagnosticSource.dll
+  Delete $INSTDIR\System.IO.Pipelines.dll
+  Delete $INSTDIR\System.Memory.dll
+  Delete $INSTDIR\System.Numerics.Vectors.dll
+  Delete $INSTDIR\System.Runtime.CompilerServices.Unsafe.dll
+  Delete $INSTDIR\System.Security.AccessControl.dll
+  Delete $INSTDIR\System.Security.Principal.Windows.dll
+  Delete $INSTDIR\System.Threading.AccessControl.dll
+  Delete $INSTDIR\System.Threading.Tasks.Dataflow.dll
+  Delete $INSTDIR\System.Threading.Tasks.Extensions.dll
+  Delete $INSTDIR\TimeTracker.exe
+  Delete $INSTDIR\TimeTracker.exe.config
+  
+  RMDir $INSTDIR
+  SetShellVarContext all
+  Delete "$SMPROGRAMS\TimeTracker.lnk"
+  Delete "$SMPROGRAMS\UninstallTimeTracker.lnk"
+  RMDir "$SMPROGRAMS\TimeTracker"
+  Delete "$DESKTOP\TimeTracker.lnk"
+  SetShellVarContext current
+SectionEnd
