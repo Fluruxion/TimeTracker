@@ -19,6 +19,7 @@ namespace TimeTracker
         DateTime pauseEnd { get; set; }
         public TimeSpan timeTaken { get; set; }
         public DateTime lastSaved { get; set; }
+        public bool isChecked { get; set; }
         double hoursTaken
         {
             get
@@ -95,6 +96,14 @@ namespace TimeTracker
             start = _start;
             end = _end;
             timeTaken = new TimeSpan(0);
+        }
+        public TimeItem(string _name, TimeSpan _timeTaken, string _comments)
+        {
+            name = _name;
+            end = DateTime.Now;
+            lastSaved = DateTime.Now;
+            timeTaken = _timeTaken;
+            comments = _comments;
         }
         public TimeItem(TimeItem _item)
         {

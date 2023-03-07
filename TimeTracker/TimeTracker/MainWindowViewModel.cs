@@ -34,6 +34,19 @@ namespace TimeTracker
                 OnPropertyChanged("active");
             }
         }
+        private bool _fullDayActive { get; set; }
+        public bool fullDayActive
+        {
+            get
+            {
+                return _fullDayActive;
+            }
+            set
+            {
+                _fullDayActive = value;
+                OnPropertyChanged("fullDayActive");
+            }
+        }
         private TimeSpan TotalTimeMinusActive
         {
             get
@@ -74,6 +87,9 @@ namespace TimeTracker
         private ICommand _CommandRefresh { get; set; }
         private ICommand _CommandClosePopup { get; set; }
         private ICommand _CommandImportCSV { get; set; }
+        private ICommand _CommandFullDay { get; set; }
+        private ICommand _CommandConfirmFullDay { get; set; }
+        private ICommand _CommandCancelFullDay { get; set; }
 
         public string timer
         {
@@ -220,6 +236,42 @@ namespace TimeTracker
                 return _CommandImportCSV;
             }
         }
+        public ICommand CommandFullDay
+        {
+            get
+            {
+                if (_CommandFullDay == null)
+                {
+                    _CommandFullDay = new DelegateCommand(p => FullDayBegin());
+                }
+
+                return _CommandFullDay;
+            }
+        }
+        public ICommand CommandConfirmFullDay
+        {
+            get
+            {
+                if (_CommandConfirmFullDay == null)
+                {
+                    _CommandConfirmFullDay = new DelegateCommand(p => ConfirmFullDay());
+                }
+
+                return _CommandConfirmFullDay;
+            }
+        }
+        public ICommand CommandCancelFullDay
+        {
+            get
+            {
+                if (_CommandCancelFullDay == null)
+                {
+                    _CommandCancelFullDay = new DelegateCommand(p => CancelFullDay());
+                }
+
+                return _CommandCancelFullDay;
+            }
+        }
         public TimeItem currentTask
         {
             get
@@ -242,6 +294,7 @@ namespace TimeTracker
             {
                 _loggedTasks = value;
                 OnPropertyChanged("loggedTasks");
+                UpdateTotalTimeTakenDisplay();
             }
         }
         public bool isPaused
@@ -293,6 +346,7 @@ namespace TimeTracker
             dispatcherTimer.Tick += new EventHandler(UpdateTimer);
             dispatcherTimer.Interval = new TimeSpan(0, 0, 10);
         }
+
         /// <summary>
         /// This is the main method used to update the screen whenever we want all the information to be updated at once instead of a small section.
         /// </summary>
@@ -358,7 +412,6 @@ namespace TimeTracker
             isPaused = false;
             loggedTasks = _items;
             OnPropertyChanged("loggedTasks");
-            UpdateTotalTimeTakenDisplay();
             CancelTask();
         }
         /// <summary>
@@ -400,7 +453,8 @@ namespace TimeTracker
         {
             List<TimeItem> _items = new List<TimeItem>();
             _items.AddRange(loggedTasks);
-            _items.RemoveAt(_items.FindIndex(x => x.name == _name));
+            int removalIndex = _items.FindIndex(x => x.name == _name);
+            if (removalIndex != -1) _items.RemoveAt(removalIndex); // Index of -1 means it doesn't exist, so only try to delete if it actually exists
 
             //loggedTasks.RemoveAt(loggedTasks.FindIndex(x => x.name == _name));
 
@@ -449,7 +503,8 @@ namespace TimeTracker
         /// </summary>
         private void UpdateTotalTimeTakenDisplay()
         {
-            if (TotalTimeMinusActive.TotalSeconds < 60) TotalTimeTakenDisplay = string.Format("Logged: {0:##} seconds", TotalTimeMinusActive.TotalSeconds);
+            if (TotalTimeMinusActive.TotalSeconds == 0) TotalTimeTakenDisplay = "";
+            else if (TotalTimeMinusActive.TotalSeconds < 60) TotalTimeTakenDisplay = string.Format("Logged: {0:##} seconds", TotalTimeMinusActive.TotalSeconds);
             else if (TotalTimeMinusActive.TotalMinutes < 60) TotalTimeTakenDisplay = string.Format("Logged: {0:##.#} minutes", TotalTimeMinusActive.TotalMinutes);
             else TotalTimeTakenDisplay = string.Format("Logged: {0} hours, {1} minutes", TotalTimeMinusActive.Hours, TotalTimeMinusActive.Minutes);
         }
@@ -495,7 +550,6 @@ namespace TimeTracker
             popupView.Close();
             popupView = null;
             popupViewModel = null;
-            UpdateTotalTimeTakenDisplay();
         }
         /// <summary>
         /// Allows the user to open a previously created .csv file with an expected format and add all entries to the logged tasks list as TimeItems.
@@ -541,9 +595,71 @@ namespace TimeTracker
                 loggedTasks = _logged;
 
                 RefreshScreen();
-                UpdateTotalTimeTakenDisplay();
             }
             else return;
+        }
+
+        /// <summary>
+        /// Part of 3 functions used to calculate a task that represents the remaining hours of a set workday.
+        /// This function just sets up the main screen to be ready to mark tasks as part of the work day.
+        /// </summary>
+        private void FullDayBegin()
+        {
+            fullDayActive = true;
+        }
+
+        /// <summary>
+        /// Takes all marked tasks, adds the times together and subtracts it from 8. Generates a task to represent the remainder of the set workday. Then sets the program back to normal mode.
+        /// This function is currently hardcoded for a full workday on Tuesday, this is because it's the only full agreed workday I currently have. May adjust application in the future if needed.
+        /// Note: This function does not wipe the IsChecked value when it completes, this means the Full Workday task can easily be regenerated with the same tasks if required.
+        /// </summary>
+        private void ConfirmFullDay()
+        {
+            // This expects the user to be generating the Full Workday task on the same day as the full workday itself, if that is not the case the CSV can be edited as required.
+            string FullDayTaskName = string.Format("Remainder of full workday - {0}/{1}/{2}", DateTime.Now.Date.Day, DateTime.Now.Date.Month, DateTime.Now.Date.Year);
+            string DayOfTheWeek = DateTime.Now.DayOfWeek.ToString().ToUpper();
+
+            // If we are creating a duplicate Full Workday task then delete the original.
+            DeleteLoggedTask(FullDayTaskName);
+
+            TimeSpan FullDayHours = new TimeSpan(8, 0, 0); // 8 Hour workday
+            TimeSpan CombinedTasks = new TimeSpan(0, 0, 0);
+
+            foreach (TimeItem item in loggedTasks)
+            {
+                if (item.isChecked)
+                {
+                    CombinedTasks = CombinedTasks.Add(item.timeTaken);
+                    if (item.comments == null) item.comments = string.Format(" - {0} (full workday)", DayOfTheWeek);
+                    if (!item.comments.ToLower().Contains(DayOfTheWeek.ToLower())) item.comments += string.Format(" - {0} (full workday)", DayOfTheWeek);
+                }
+            }
+            TimeSpan RemainderOfFullDay = new TimeSpan(0, 0, 0);
+            if (CombinedTasks.TotalSeconds > 0) RemainderOfFullDay = FullDayHours.Subtract(CombinedTasks);
+            
+            TimeItem FullDayRemainder = new TimeItem(FullDayTaskName, RemainderOfFullDay, string.Format("{0} - This task represents the remaining hours of a set full workday. Hours from tasks done during a full workday are subtracted from the original 8 hours and the remainder is added to this task.", DayOfTheWeek));
+
+            // Have to do this so the listView updates appropriately.
+            List<TimeItem> _loggedTasks = new List<TimeItem>();
+            _loggedTasks.AddRange(loggedTasks);
+            _loggedTasks.Add(FullDayRemainder);
+            loggedTasks = _loggedTasks;
+            OnPropertyChanged("loggedTasks");
+
+            fullDayActive = false;
+        }
+
+
+        /// <summary>
+        /// Removes marks from all tasks, sets the program back to normal mode.
+        /// </summary>
+        private void CancelFullDay()
+        {
+            foreach (TimeItem item in loggedTasks)
+            {
+                item.isChecked = false;
+            }
+            fullDayActive = false;
         }
     }
 }
