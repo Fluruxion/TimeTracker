@@ -541,6 +541,7 @@ namespace TimeTracker
                 loggedTasks = _logged;
 
                 RefreshScreen();
+                UpdateTotalTimeTakenDisplay();
             }
             else return;
         }
