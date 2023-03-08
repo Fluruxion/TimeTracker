@@ -1,4 +1,4 @@
-# TimeTracker
+# TimeTracker by Fluruxion
 Tracks timings for tasks and saves them to a CSV
 
 # Description
