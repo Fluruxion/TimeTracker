@@ -237,5 +237,23 @@ namespace TimeTracker
         {
             comments = _comments;
         }
+        public string GetCurrentTimeTaken()
+        {
+            DateTime CurrentTime = DateTime.Now;
+            TimeSpan CurrentSpan = new TimeSpan();
+
+            if (timePaused != null && timePaused.TotalSeconds > 0)
+            {
+                if (timeTaken != null && timeTaken.TotalSeconds > 0) CurrentSpan = timeTaken.Add(CurrentTime.Subtract(start).Subtract(timePaused));
+                else CurrentSpan = CurrentTime.Subtract(start).Subtract(timePaused);
+            }
+            else
+            {
+                if (timeTaken != null && timeTaken.TotalSeconds > 0) CurrentSpan = timeTaken.Add(CurrentTime.Subtract(start));
+                else CurrentSpan = CurrentTime.Subtract(start);
+            }
+
+            return string.Format("{0:#0} Hours\n{1:#0} Minutes", CurrentSpan.Hours, CurrentSpan.Minutes);
+        }
     }
 }

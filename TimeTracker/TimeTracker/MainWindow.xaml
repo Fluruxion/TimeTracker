@@ -217,9 +217,17 @@
                                             <ColumnDefinition Width="60"/>
                                             <ColumnDefinition Width="60"/>
                                         </Grid.ColumnDefinitions>
-                                        <Label Content="{Binding name}" Grid.Column="0" FontSize="16" FontWeight="bold"/>
+                                        <Label Content="{Binding name}" Grid.Column="0" FontSize="16" FontWeight="bold">
+                                            <Label.ToolTip>
+                                                <TextBlock Text="{Binding name}"/>
+                                            </Label.ToolTip>
+                                        </Label>
                                         <Label Content="{Binding variableTimeDisplay}" FontSize="16" Grid.Column="1"/>
-                                        <Label Content="{Binding comments}" Grid.Column="2" VerticalAlignment="Center"/>
+                                        <Label Content="{Binding comments}" Grid.Column="2" VerticalAlignment="Center">
+                                            <Label.ToolTip>
+                                                <TextBlock Text="{Binding comments}" TextWrapping="WrapWithOverflow" MaxWidth="500"/>
+                                            </Label.ToolTip>
+                                        </Label>
                                         <Button Grid.Column="3" Width="50" Height="22" Content="Edit" Command="{Binding DataContext.CommandEdit, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
                                         <Button Grid.Column="4" Width="60" Height="22" Content="Continue" Command="{Binding DataContext.CommandContinue, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
                                         <Button Grid.Column="5" Width="50" Height="22" Content="Delete" Command="{Binding DataContext.CommandDelete, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>

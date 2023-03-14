@@ -95,13 +95,9 @@ namespace TimeTracker
         {
             get
             {
-                // Using actual time as the Dispatch timer doesn't appear to trigger exactly as expected which results in a wobbly timer unless checking datetime.now and comparing to start time
                 if (currentTask == null) return "0 Hours\n0 Minutes";
 
-                TimeSpan currentTimeDisplay = DateTime.Now.Subtract(currentTask.start);
-                if (currentTask.timePaused != null) currentTimeDisplay = currentTimeDisplay.Subtract(currentTask.timePaused);
-
-                return string.Format("{0:#0} Hours\n{1:#0} Minutes", currentTimeDisplay.Hours, currentTimeDisplay.Minutes);
+                return currentTask.GetCurrentTimeTaken();
             }
         }
         public ICommand CommandPause
