@@ -502,7 +502,7 @@ namespace TimeTracker
             if (TotalTimeMinusActive.TotalSeconds == 0) TotalTimeTakenDisplay = "";
             else if (TotalTimeMinusActive.TotalSeconds < 60) TotalTimeTakenDisplay = string.Format("Logged: {0:##} seconds", TotalTimeMinusActive.TotalSeconds);
             else if (TotalTimeMinusActive.TotalMinutes < 60) TotalTimeTakenDisplay = string.Format("Logged: {0:##.#} minutes", TotalTimeMinusActive.TotalMinutes);
-            else TotalTimeTakenDisplay = string.Format("Logged: {0} hours, {1} minutes", TotalTimeMinusActive.Hours, TotalTimeMinusActive.Minutes);
+            else TotalTimeTakenDisplay = string.Format("Logged: {0:##} hours, {1} minutes", TotalTimeMinusActive.TotalHours, TotalTimeMinusActive.Minutes);
         }
 
         /// <summary>
