@@ -568,7 +568,17 @@ namespace TimeTracker
 
             if (openFile.ShowDialog() == true)
             {
-                List<string> fileInput = File.ReadLines(openFile.FileName).ToList();
+                List<string> fileInput = new List<string>();
+
+                try
+                {
+                    fileInput = File.ReadLines(openFile.FileName).ToList();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("File is open or in use.\nPlease close the file before attempting to open it again.");
+                    return;
+                }
 
                 int count = 0;
 
