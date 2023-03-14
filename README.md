@@ -14,6 +14,7 @@ Features and design choices are likely to represent requirements for my current 
   - Save tasks with a name and comment
   - Pause ongoing task
   - Timer shows current hours and minutes taken on ongoing task
+  - Hovering over a name or comment shows the full overflowed text in a tooltip
 - Edit logged task hours (Opens popup window to make quick changes)
 - Continue logged task to resume tracking time taken
 - Delete logged task
@@ -35,6 +36,11 @@ Ongoing Task:
 Logged Task:
 
 ![image](https://user-images.githubusercontent.com/32364684/223699191-9156d922-e16a-45f5-8768-515e311996d1.png)
+
+Comment Overflow Tooltip:
+
+![image](https://user-images.githubusercontent.com/32364684/224958330-d1fff9ae-88dd-4f23-9421-75d8c43aca89.png)
+
 
 Editing Task:
 
