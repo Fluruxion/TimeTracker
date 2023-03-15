@@ -534,7 +534,14 @@ namespace TimeTracker
             saveFile.InitialDirectory = desktop;
             if (saveFile.ShowDialog() == true)
             {
-                File.WriteAllText(saveFile.FileName, output);
+                try
+                {
+                    File.WriteAllText(saveFile.FileName, output);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to save CSV.\nMake sure you're not trying to save to a file that's in use.");
+                }
             }
         }
         /// <summary>

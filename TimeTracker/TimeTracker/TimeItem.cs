@@ -19,6 +19,13 @@ namespace TimeTracker
         DateTime pauseEnd { get; set; }
         public TimeSpan timeTaken { get; set; }
         public DateTime lastSaved { get; set; }
+        public string lastSavedDisplay
+        {
+            get
+            {
+                return string.Format("Last Saved: {0}/{1}/{2}", lastSaved.Day, lastSaved.Month, lastSaved.Year);
+            }
+        }
         public bool isChecked { get; set; }
         double hoursTaken
         {

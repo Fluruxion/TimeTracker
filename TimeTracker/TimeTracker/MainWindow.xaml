@@ -222,7 +222,11 @@
                                                 <TextBlock Text="{Binding name}"/>
                                             </Label.ToolTip>
                                         </Label>
-                                        <Label Content="{Binding variableTimeDisplay}" FontSize="16" Grid.Column="1"/>
+                                        <Label Content="{Binding variableTimeDisplay}" FontSize="16" Grid.Column="1">
+                                            <Label.ToolTip>
+                                                <TextBlock Text="{Binding lastSavedDisplay}" TextWrapping="WrapWithOverflow" MaxWidth="500"/>
+                                            </Label.ToolTip>
+                                        </Label>
                                         <Label Content="{Binding comments}" Grid.Column="2" VerticalAlignment="Center">
                                             <Label.ToolTip>
                                                 <TextBlock Text="{Binding comments}" TextWrapping="WrapWithOverflow" MaxWidth="500"/>
