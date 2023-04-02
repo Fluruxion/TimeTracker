@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:TimeTracker"
         mc:Ignorable="d"
         x:Name="TimeTrackerWindow"
-        Title="Time Tracker" Height="450" Width="1150">
-    <Grid>
+        Title="Task Tracker" Height="450" Width="1150">
+    <Grid KeyDown="Grid_KeyDown">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
@@ -18,15 +18,6 @@
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Grid.Column="0" Content="{Binding timer}" Width="120" VerticalAlignment="Center" FontSize="18" FontWeight="Bold"/>
-        <Grid Grid.Row="0" Grid.Column="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
-            <Button Command="{Binding CommandSave}" Grid.Column="0" Content="SAVE" Width="100" Height="40"/>
-            <Button Command="{Binding CommandImportCSV}" Grid.Column="1" Content="OPEN" Width="50" Height="40"/>
-        </Grid>
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -35,7 +26,7 @@
             </Grid.ColumnDefinitions>
             <Grid HorizontalAlignment="Center" Grid.Column="1">
                 <Grid Margin="10,10,0,0" VerticalAlignment="Top">
-                    <TextBox x:Name="txtName" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap" Text="{Binding inputName}" VerticalAlignment="Center" Width="120" VerticalContentAlignment="Center">
+                    <TextBox KeyboardNavigation.TabIndex="0" x:Name="txtName" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap" Text="{Binding inputName}" VerticalAlignment="Center" Width="252" VerticalContentAlignment="Center">
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}">
                                 <Style.Triggers>
@@ -59,70 +50,21 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </Grid>
-                <Button x:Name="btnStart" Command="{Binding CommandStart}" Content="Start" HorizontalAlignment="Left" Margin="135,10,0,0" VerticalAlignment="Top" Width="75" Height="22">
+                <Button KeyboardNavigation.TabIndex="2" x:Name="btnEnd" Command="{Binding CommandFinish}" Content="Add" HorizontalAlignment="Left" Margin="269,10,0,0" VerticalAlignment="Top" Width="75" Height="22">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
                             <Setter Property="IsEnabled" Value="True"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding active}" Value="true">
-                                    <Setter Property="Background" Value="Green"/>
-                                    <Setter Property="IsHitTestVisible" Value="False"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Text, ElementName=txtName}" Value="">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button x:Name="btnPauseToggle" Command="{Binding CommandPause}" Content="⏯" HorizontalAlignment="Left" Margin="215,10,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" Width="22" Height="22">
-                    <Button.Resources>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="IsEnabled" Value="True"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.isPaused, ElementName=TimeTrackerWindow}" Value="true">
-                                    <Setter Property="Background" Value="Red"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding active}" Value="false">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Resources>
-                </Button>
-                <Button x:Name="btnEnd" Command="{Binding CommandFinish}" Content="Stop+Save" HorizontalAlignment="Left" Margin="242,10,0,0" VerticalAlignment="Top" Width="75" Height="22">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="IsEnabled" Value="True"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding active}" Value="false">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding isPaused}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button x:Name="btnCancel" Command="{Binding CommandCancel}" Content="❌" HorizontalAlignment="Left" Margin="322,10,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="22" Height="22">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="IsEnabled" Value="True"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Text, ElementName=txtName}" Value="">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
                         </Style>
                     </Button.Style>
                 </Button>
                 <Grid VerticalAlignment="Top" Margin="10,37,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="43*"/>
-                        <ColumnDefinition Width="291*"/>
+                        <ColumnDefinition Width="53*"/>
+                        <ColumnDefinition Width="56*"/>
+                        <ColumnDefinition Width="189*"/>
+                        <ColumnDefinition Width="36*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox x:Name="txtComments" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="{Binding inputComments}" Width="334" VerticalContentAlignment="Center" Grid.ColumnSpan="2">
+                    <TextBox KeyboardNavigation.TabIndex="1" KeyboardNavigation.AcceptsReturn="True" x:Name="txtComments" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="{Binding inputComments}" Width="334" VerticalContentAlignment="Center" Grid.ColumnSpan="4">
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}">
                                 <Style.Triggers>
@@ -133,7 +75,7 @@
                             </Style>
                         </TextBox.Style>
                     </TextBox>
-                    <TextBlock Padding="3,3,0,0" IsHitTestVisible="False" Text="Comments" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="DarkGray" Margin="0,0,0,0" Grid.ColumnSpan="2">
+                    <TextBlock Padding="3,3,0,0" IsHitTestVisible="False" Text="Comments" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="DarkGray" Margin="0,2" Grid.ColumnSpan="2">
                         <TextBlock.Style>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -147,61 +89,13 @@
                     </TextBlock>
                 </Grid>
             </Grid>
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Button Grid.RowSpan="2" Width="75" Height="22" Content="Full Day" Command="{Binding CommandFullDay}">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding fullDayActive}" Value="true">
-                                    <Setter Property="Visibility" Value="Hidden"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding fullDayActive}" Value="false">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button Grid.Row="0" Width="75" Height="22" Content="Confirm" Command="{Binding CommandConfirmFullDay}">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding fullDayActive}" Value="true">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding fullDayActive}" Value="false">
-                                    <Setter Property="Visibility" Value="Hidden"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button Grid.Row="1" Width="75" Height="22" Content="Cancel" Command="{Binding CommandCancelFullDay}">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding fullDayActive}" Value="true">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding fullDayActive}" Value="false">
-                                    <Setter Property="Visibility" Value="Hidden"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </Grid>
         </Grid>
         <Grid Grid.Row="1" Margin="50,0,50,10" Grid.ColumnSpan="3">
             <ScrollViewer>
                 <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding loggedTasks}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid>
+                            <Grid MaxHeight="60">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition Width="*"/>
@@ -210,11 +104,8 @@
                                 <Grid Grid.Column="1" Background="Black">
                                     <Grid Margin="2,2,2,1" Background="White">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="350"/>
-                                            <ColumnDefinition Width="60"/>
-                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="300"/>
+                                            <ColumnDefinition Width="450"/>
                                             <ColumnDefinition Width="60"/>
                                         </Grid.ColumnDefinitions>
                                         <Label Content="{Binding name}" Grid.Column="0" FontSize="16" FontWeight="bold">
@@ -222,19 +113,12 @@
                                                 <TextBlock Text="{Binding name}"/>
                                             </Label.ToolTip>
                                         </Label>
-                                        <Label Content="{Binding variableTimeDisplay}" FontSize="16" Grid.Column="1">
-                                            <Label.ToolTip>
-                                                <TextBlock Text="{Binding lastSavedDisplay}" TextWrapping="WrapWithOverflow" MaxWidth="500"/>
-                                            </Label.ToolTip>
-                                        </Label>
-                                        <Label Content="{Binding comments}" Grid.Column="2" VerticalAlignment="Center">
+                                        <Label Content="{Binding comments}" Grid.Column="1" VerticalAlignment="Center">
                                             <Label.ToolTip>
                                                 <TextBlock Text="{Binding comments}" TextWrapping="WrapWithOverflow" MaxWidth="500"/>
                                             </Label.ToolTip>
                                         </Label>
-                                        <Button Grid.Column="3" Width="50" Height="22" Content="Edit" Command="{Binding DataContext.CommandEdit, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
-                                        <Button Grid.Column="4" Width="60" Height="22" Content="Continue" Command="{Binding DataContext.CommandContinue, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
-                                        <Button Grid.Column="5" Width="50" Height="22" Content="Delete" Command="{Binding DataContext.CommandDelete, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
+                                        <Button Grid.Column="3" Width="50" Height="22" Content="Remove" Command="{Binding DataContext.CommandDelete, ElementName=TimeTrackerWindow}" CommandParameter="{Binding name}"/>
                                     </Grid>
                                 </Grid>
                                 <Grid Grid.Column="2">
@@ -259,7 +143,6 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
-        <Label Grid.Row="2" Grid.Column="2" Content="{Binding TotalTimeTakenDisplay}" FontWeight="Bold"/>
 
     </Grid>
 

@@ -24,5 +24,13 @@ namespace TimeTracker
         {
             InitializeComponent();
         }
+
+        private void Grid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.N && e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            {
+                txtName.Focus();
+            }
+        }
     }
 }

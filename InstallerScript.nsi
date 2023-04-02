@@ -9,10 +9,10 @@ Icon "TimeTracker\TimeTracker\TimeTrackerLOGO2.ico"
 ;--------------------------------
 
 ; The name of the installer
-Name "TimeTracker"
+Name "TaskTracker"
 
 ; The file to write
-OutFile "TimeTracker.exe"
+OutFile "TaskTracker.exe"
 
 ; Request application privileges for Windows Vista and higher
 RequestExecutionLevel none
@@ -21,11 +21,11 @@ RequestExecutionLevel none
 Unicode True
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\TimeTracker
+InstallDir $PROGRAMFILES\TaskTracker
 
 ; Registry key to check for directory (so if you install again, it will 
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\TimeTracker" "Install_Dir"
+InstallDirRegKey HKLM "Software\TaskTracker" "Install_Dir"
 
 ;--------------------------------
 
@@ -156,7 +156,7 @@ FunctionEnd
 ;--------------------------------
 
 ; The stuff to install
-Section "TimeTracker"
+Section "TaskTracker"
 
   SectionIn RO
   
@@ -198,10 +198,10 @@ Section "TimeTracker"
   File "TimeTracker\TimeTracker\bin\Release\System.Threading.AccessControl.dll"
   File "TimeTracker\TimeTracker\bin\Release\System.Threading.Tasks.Dataflow.dll"
   File "TimeTracker\TimeTracker\bin\Release\System.Threading.Tasks.Extensions.dll"
-  File "TimeTracker\TimeTracker\bin\Release\TimeTracker.exe"
+  File "TimeTracker\TimeTracker\bin\Release\TaskTracker.exe"
 
   SetOverwrite off
-  File "TimeTracker\TimeTracker\bin\Release\TimeTracker.exe.config"
+  File "TimeTracker\TimeTracker\bin\Release\TaskTracker.exe.config"
   SetOverwrite on
     
   ; Catch to delete the current uninstall.exe
@@ -211,30 +211,30 @@ Section "TimeTracker"
   Call CheckAndDownloadDotNet472
   
   ; Write the installation path into the registry
-  WriteRegStr HKLM "Software\TimeTracker" "Install_Dir" "$INSTDIR"
-  WriteRegStr HKLM "Software\TimeTracker" "Version" "1.0.0"
+  WriteRegStr HKLM "Software\TaskTracker" "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM "Software\TaskTracker" "Version" "1.0.0"
   
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "DisplayName" "TimeTracker"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "UninstallString" "$INSTDIR\UninstallTimeTracker.exe"
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "NoModify" "1"
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "NoRepair" "1"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker" "DisplayIcon" "$INSTDIR\TimeTracker.exe"
-  WriteUninstaller "$INSTDIR\UninstallTimeTracker.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TaskTracker" "DisplayName" "TaskTracker"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TaskTracker" "UninstallString" "$INSTDIR\UninstallTaskTracker.exe"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TaskTracker" "NoModify" "1"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TaskTracker" "NoRepair" "1"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TaskTracker" "DisplayIcon" "$INSTDIR\TaskTracker.exe"
+  WriteUninstaller "$INSTDIR\UninstallTaskTracker.exe"
   
 SectionEnd
 
 ; Optional section (can be disabled by the user)
 Section "Start Menu Shortcuts"
   SetShellVarContext all
-  CreateShortcut "$SMPROGRAMS\TimeTracker.lnk" "$INSTDIR\TimeTracker.exe"
+  CreateShortcut "$SMPROGRAMS\TaskTracker.lnk" "$INSTDIR\TaskTracker.exe"
   SetShellVarContext current
 SectionEnd
 
 ; Optional section (can be disabled by the user)
 Section "Desktop Shortcuts"
   SetShellVarContext all
-  CreateShortcut "$DESKTOP\TimeTracker.lnk" "$INSTDIR\TimeTracker.exe"
+  CreateShortcut "$DESKTOP\TaskTracker.lnk" "$INSTDIR\TaskTracker.exe"
   SetShellVarContext current
 SectionEnd
 
@@ -246,12 +246,12 @@ SectionEnd
 Section "Uninstall"
   
   ; Remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TimeTracker"
-  DeleteRegKey HKLM "SOFTWARE\TimeTracker"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TaskTracker"
+  DeleteRegKey HKLM "SOFTWARE\TaskTracker"
 
   ; Remove files and uninstaller
   ; Populate this with the same script as the install dir
-  Delete $INSTDIR\UninstallTimeTracker.exe
+  Delete $INSTDIR\UninstallTaskTracker.exe
   Delete $INSTDIR\MessagePack.Annotations.dll
   Delete $INSTDIR\MessagePack.dll
   Delete $INSTDIR\Microsoft.Bcl.AsyncInterfaces.dll
@@ -285,14 +285,14 @@ Section "Uninstall"
   Delete $INSTDIR\System.Threading.AccessControl.dll
   Delete $INSTDIR\System.Threading.Tasks.Dataflow.dll
   Delete $INSTDIR\System.Threading.Tasks.Extensions.dll
-  Delete $INSTDIR\TimeTracker.exe
-  Delete $INSTDIR\TimeTracker.exe.config
+  Delete $INSTDIR\TaskTracker.exe
+  Delete $INSTDIR\TaskTracker.exe.config
   
   RMDir $INSTDIR
   SetShellVarContext all
-  Delete "$SMPROGRAMS\TimeTracker.lnk"
-  Delete "$SMPROGRAMS\UninstallTimeTracker.lnk"
-  RMDir "$SMPROGRAMS\TimeTracker"
-  Delete "$DESKTOP\TimeTracker.lnk"
+  Delete "$SMPROGRAMS\TaskTracker.lnk"
+  Delete "$SMPROGRAMS\UninstallTaskTracker.lnk"
+  RMDir "$SMPROGRAMS\TaskTracker"
+  Delete "$DESKTOP\TaskTracker.lnk"
   SetShellVarContext current
 SectionEnd
