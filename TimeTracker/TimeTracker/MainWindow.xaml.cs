@@ -23,10 +23,10 @@ namespace TimeTracker
         public MainWindow()
         {
             InitializeComponent();
-            Window.GetWindow(this).KeyDown += Grid_KeyDown;
+            Window.GetWindow(this).KeyDown += HotKeyDown;
         }
 
-        private void Grid_KeyDown(object sender, KeyEventArgs e)
+        private void HotKeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
             {
