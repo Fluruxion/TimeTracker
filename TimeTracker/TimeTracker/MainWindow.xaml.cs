@@ -23,77 +23,29 @@ namespace TimeTracker
         public MainWindow()
         {
             InitializeComponent();
-            Window.GetWindow(this).KeyDown += Grid_KeyDown;
+            Window.GetWindow(this).KeyDown += HotKeyDown;
         }
 
-        private void Grid_KeyDown(object sender, KeyEventArgs e)
+        private void HotKeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
             {
                 var context = (MainWindowViewModel)Window.GetWindow(this).DataContext;
-
                 switch (e.Key)
                 {
-                    case Key.Enter:
-                        txtComments.Focus();
-                        if (btnStart.IsEnabled && txtName.IsEnabled)
-                            context.CommandStart.Execute(null);
+                    case Key.N:
+                        txtName.Focus();
                         break;
-
+                    case Key.Enter:
+                        if (txtComments.IsEnabled)
+                            txtComments.Focus();
+                        break;
                     case Key.S:
                         btnEnd.Focus();
                         if (btnEnd.IsEnabled)
                             context.CommandFinish.Execute(null);
                         break;
-
-                    case Key.N:
-                        txtName.Focus();
-                        break;
-
-                    case Key.P:
-                        context.CommandPause.Execute(null);
-                        break;
-
-                    case Key.O:
-                        context.CommandImportCSV.Execute(null);
-                        break;
-
-                    case Key.C:
-                        MessageBoxResult result = MessageBox.Show(
-                            "This will delete all logged tasks, are you sure?",
-                            "Clear Tasks?",
-                            MessageBoxButton.YesNo,
-                            MessageBoxImage.Warning,
-                            MessageBoxResult.No
-                            );
-
-                        if (result == MessageBoxResult.Yes)
-                        {
-                            context.loggedTasks = new List<TimeItem>();
-                        }
-
-                        break;
                 }
-            }
-            else if (e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
-            {
-                var context = (MainWindowViewModel)Window.GetWindow(this).DataContext;
-
-                switch (e.Key)
-                {
-                    case Key.S:
-                        if (context.currentTask == null)
-                            context.CommandSave.Execute(null);
-                        break;
-                }
-            }
-        }
-
-        private void Grid_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.N && e.KeyboardDevice.Modifiers == ModifierKeys.Control)
-            {
-                txtName.Focus();
             }
         }
     }

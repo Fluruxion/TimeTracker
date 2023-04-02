@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         x:Name="TimeTrackerWindow"
         Title="Task Tracker" Height="450" Width="1150">
-    <Grid KeyDown="Grid_KeyDown">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
