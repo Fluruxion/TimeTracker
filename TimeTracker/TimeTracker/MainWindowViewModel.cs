@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows;
 using System.Windows.Threading;
 using System.IO;
+using Microsoft.Win32;
 
 namespace TimeTracker
 {
@@ -513,6 +514,9 @@ namespace TimeTracker
         private void SaveCSV()
         {
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            string lastPath = GetLastPathInRegistry();
+            if (lastPath != "")
+                desktop = lastPath;
 
             Microsoft.Win32.SaveFileDialog saveFile = new Microsoft.Win32.SaveFileDialog();
             string output = "";
@@ -542,6 +546,11 @@ namespace TimeTracker
                 {
                     MessageBox.Show("Failed to save CSV.\nMake sure you're not trying to save to a file that's in use.");
                 }
+                finally
+                {
+                    string test = Directory.GetParent(saveFile.FileName).FullName;
+                    SetLastPathInRegistry(test);
+                }
             }
         }
         /// <summary>
@@ -563,6 +572,10 @@ namespace TimeTracker
         {
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
 
+            string lastPath = GetLastPathInRegistry();
+            if (lastPath != "")
+                desktop = lastPath;
+
             Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
 
             openFile.DefaultExt = ".CSV";
@@ -581,6 +594,11 @@ namespace TimeTracker
                 {
                     MessageBox.Show("File is open or in use.\nPlease close the file before attempting to open it again.");
                     return;
+                }
+                finally
+                {
+                    string test = Directory.GetParent(openFile.FileName).FullName;
+                    SetLastPathInRegistry(test);
                 }
 
                 int count = 0;
@@ -673,6 +691,27 @@ namespace TimeTracker
                 item.isChecked = false;
             }
             fullDayActive = false;
+        }
+
+        public string GetLastPathInRegistry()
+        {
+            RegistryKey RegPath = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\TimeTracker");
+            if (RegPath == null)
+                return "";
+
+            object returnPath = RegPath.GetValue("LastPath");
+            if (returnPath == null)
+                returnPath = "";
+
+            return returnPath.ToString();
+        }
+        public void SetLastPathInRegistry(string path)
+        {
+            RegistryKey RegSave = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\TimeTracker");
+            if (RegSave == null)
+                return;
+
+            if (path != null && path != "") RegSave.SetValue("LastPath", path);
         }
     }
 }
